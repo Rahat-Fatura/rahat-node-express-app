@@ -1,0 +1,37 @@
+{
+  "rules": {
+    "field-order": [
+      "error",
+      {
+        "order": [
+          "id",
+          "created_at",
+          "updated_at",
+          "deleted_at",
+          "..."
+        ]
+      }
+    ],
+    "require-field-type": [
+      "error",
+      {
+        "require": [
+          {
+            "ifName": "/_at$/",
+            "type": "DateTime"
+          }
+        ]
+      }
+    ],
+    "require-field": [
+      "error",
+      {
+        "require": [
+          "id",
+          "created_at",
+          "updated_at"
+        ]
+      }
+    ]
+  }
+}
