@@ -63,7 +63,7 @@ const refreshAuth = async (refreshToken) => {
 const resetPassword = async (resetPasswordToken, newPassword) => {
   try {
     const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
-    const user = await userService.getUserById(resetPasswordTokenDoc.user);
+    const user = await userService.getUserById(resetPasswordTokenDoc.user_id);
     if (!user) {
       throw new Error();
     }

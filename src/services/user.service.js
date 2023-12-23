@@ -23,7 +23,7 @@ const createUser = async (userBody) => {
  * @returns {Promise<User>}
  */
 const getUserById = async (id) => {
-  const user = await User.findFirst({ where: { id } });
+  const user = await User.findUnique({ where: { id: Number(id) } });
   return user;
 };
 
