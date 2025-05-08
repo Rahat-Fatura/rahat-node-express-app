@@ -3,13 +3,7 @@
     "field-order": [
       "error",
       {
-        "order": [
-          "id",
-          "created_at",
-          "updated_at",
-          "deleted_at",
-          "..."
-        ]
+        "order": ["id", "createdAt", "updatedAt", "deletedAt", "..."]
       }
     ],
     "require-field-type": [
@@ -26,11 +20,7 @@
     "require-field": [
       "error",
       {
-        "require": [
-          "id",
-          "created_at",
-          "updated_at"
-        ]
+        "require": ["id", "createdAt", "updatedAt"]
       }
     ]
   }

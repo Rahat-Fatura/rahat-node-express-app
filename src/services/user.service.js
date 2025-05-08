@@ -1,29 +1,14 @@
 const httpStatus = require('http-status');
 const bcrypt = require('bcryptjs');
 const ApiError = require('../utils/ApiError');
-const User = require('../utils/database').user;
-
-/**
- * Create a user
- * @param {Object} userBody
- * @returns {Promise<User>}
- */
-const createUser = async (userBody) => {
-  if (await User.findFirst({ where: { email: userBody.email } })) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'e-Posta daha önce alınmış');
-  }
-  const userdata = Object.assign(userBody, { password: await bcrypt.hash(userBody.password, 8) });
-  const user = await User.create({ data: userdata });
-  return user;
-};
-
+const { userModel } = require('../models');
 /**
  * Get user by id
  * @param {ObjectId} id
  * @returns {Promise<User>}
  */
 const getUserById = async (id) => {
-  const user = await User.findUnique({ where: { id: Number(id) } });
+  const user = await userModel.getUserById(id);
   return user;
 };
 
@@ -33,7 +18,21 @@ const getUserById = async (id) => {
  * @returns {Promise<User>}
  */
 const getUserByEmail = async (email) => {
-  const user = await User.findFirst({ where: { email } });
+  const user = await userModel.getUserByEmail(email);
+  return user;
+};
+/**
+ * Create a user
+ * @param {Object} userBody
+ * @returns {Promise<import('@prisma/client').User>}
+ */
+const createUser = async (userBody) => {
+  const existUser = await getUserByEmail(userBody.email);
+  if (existUser) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'e-Posta daha önce alınmış');
+  }
+  const userdata = Object.assign(userBody, { password: await bcrypt.hash(userBody.password, 8) });
+  const user = await userModel.createUser(userdata);
   return user;
 };
 
@@ -41,7 +40,7 @@ const getUserByEmail = async (email) => {
  * Update user by id
  * @param {ObjectId} userId
  * @param {Object} updateBody
- * @returns {Promise<User>}
+ * @returns {Promise<import('@prisma/client').User>}
  */
 const updateUserById = async (userId, updateBody) => {
   const user = await getUserById(userId);
@@ -49,15 +48,14 @@ const updateUserById = async (userId, updateBody) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'Kullanıcı bulunamadı');
   }
   const newBody = updateBody;
-  if (newBody.email && (await User.findFirst({ where: { email: newBody.email, NOT: { id: userId } } }))) {
+  if (newBody.email && (await userModel.findUser({ email: newBody.email, NOT: { id: userId } }))) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'e-Posta daha önce alınmış');
   }
   if (newBody.password) {
     newBody.password = await bcrypt.hash(newBody.password, 8);
   }
-  Object.assign(user, newBody);
-  await User.update({ where: { id: userId }, data: user });
-  return user;
+  const updatedUser = await userModel.updateUserById(userId, newBody);
+  return updatedUser;
 };
 
 /**
@@ -69,11 +67,8 @@ const deleteUserById = async (deleteUserId, fromByUserId) => {
   if (deleteUserId === fromByUserId) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Kendi hesabınızı silemezsiniz');
   }
-  const user = await getUserById(deleteUserId);
-  if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-  }
-  await User.delete({ where: { id: deleteUserId } });
+  const user = await userModel.deleteUserById(deleteUserId);
+
   return user;
 };
 
@@ -82,7 +77,7 @@ const deleteUserById = async (deleteUserId, fromByUserId) => {
  * @returns {Promise<User>}
  */
 const getUsersList = async () => {
-  const users = await User.findMany();
+  const users = await userModel.getUsers();
   return users;
 };
 

@@ -1,7 +1,7 @@
 const { Strategy: JwtStrategy, ExtractJwt } = require('passport-jwt');
 const config = require('./config');
 const { tokenTypes } = require('./tokens');
-const User = require('../utils/database').user;
+const userService = require('../services/user.service');
 
 const jwtOptions = {
   secretOrKey: config.jwt.secret,
@@ -13,7 +13,7 @@ const jwtVerify = async (payload, done) => {
     if (payload.type !== tokenTypes.ACCESS) {
       throw new Error('Geçersiz token tipi');
     }
-    const user = await User.findUnique({ where: { id: payload.sub } });
+    const user = await userService.getUserById(payload.sub);
     if (!user) {
       return done(null, false);
     }
